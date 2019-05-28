@@ -59,7 +59,6 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
   statefulset: Statefulset;
   top: number;
   box: HTMLElement;
-  naviList = JSON.stringify(templateDom);
   cpuUnitPrice = 30;
   memoryUnitPrice = 10;
   eventList: any[] = Array();
@@ -77,7 +76,7 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
               private messageHandlerService: MessageHandlerService,
               @Inject(DOCUMENT) private document: any,
               private eventManager: EventManager) {
-    super();
+    super(templateDom, containerDom);
   }
 
   ngAfterViewInit() {
@@ -108,32 +107,6 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
         this.top = this.box.scrollTop + this.box.offsetHeight - 48;
       }, 0);
     }
-  }
-
-  get containersLength(): number {
-    try {
-      return this.kubeResource.spec.template.spec.containers.length;
-    } catch (error) {
-      return 0;
-    }
-  }
-
-  setContainDom(i) {
-    const dom = JSON.parse(JSON.stringify(containerDom));
-    dom.id += i ? i : '';
-    dom.child.forEach(item => {
-      item.id += i ? i : '';
-    });
-    return dom;
-  }
-
-  initNavList() {
-    this.naviList = null;
-    const naviList = JSON.parse(JSON.stringify(templateDom));
-    for (let key = 0; key < this.containersLength; key++) {
-      naviList[0].child.push(this.setContainDom(key));
-    }
-    this.naviList = JSON.stringify(naviList);
   }
 
   checkIfInvalid(index: number, field: string): boolean {
@@ -254,14 +227,16 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
     this.initNavList();
   }
 
-  onAddEnv(index: number) {
+  onAddEnv(index: number, event: Event) {
+    event.stopPropagation();
     if (!this.kubeResource.spec.template.spec.containers[index].env) {
       this.kubeResource.spec.template.spec.containers[index].env = [];
     }
     this.kubeResource.spec.template.spec.containers[index].env.push(this.defaultEnv(0));
   }
 
-  onAddEnvFrom(index: number) {
+  onAddEnvFrom(index: number, event: Event) {
+    event.stopPropagation();
     if (!this.kubeResource.spec.template.spec.containers[index].envFrom) {
       this.kubeResource.spec.template.spec.containers[index].envFrom = [];
     }
@@ -293,6 +268,7 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
       probe.httpGet = new HTTPGetAction();
       probe.timeoutSeconds = 1;
       probe.periodSeconds = 10;
+      probe.initialDelaySeconds = 30;
       probe.failureThreshold = 10;
     }
     this.kubeResource.spec.template.spec.containers[i].readinessProbe = probe;
@@ -354,6 +330,7 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
     container.resources.limits = {'memory': '', 'cpu': ''};
     container.env = [];
     container.envFrom = [];
+    container.imagePullPolicy = 'IfNotPresent';
     return container;
   }
 

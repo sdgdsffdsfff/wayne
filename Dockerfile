@@ -18,9 +18,10 @@ RUN cd /workspace && \
        npm run build
 
 # build server
-FROM 360cloud/wayne-server-builder:v1.0.0 as backend
+FROM 360cloud/wayne-server-builder:v1.0.1 as backend
 
-COPY src/vendor /go/src/github.com/Qihoo360/wayne/src/vendor
+COPY go.mod /go/src/github.com/Qihoo360/wayne
+COPY go.sum /go/src/github.com/Qihoo360/wayne
 
 COPY src/backend /go/src/github.com/Qihoo360/wayne/src/backend
 
@@ -30,10 +31,10 @@ COPY --from=frontend /workspace/dist/ /go/src/github.com/Qihoo360/wayne/src/back
 
 COPY --from=frontend /workspace/dist/index.html /go/src/github.com/Qihoo360/wayne/src/backend/views/
 
-RUN cd /go/src/github.com/Qihoo360/wayne/src/backend && bee generate docs && bee pack -o /_build
+RUN export GO111MODULE=on && cd /go/src/github.com/Qihoo360/wayne/src/backend && bee generate docs && bee pack -o /_build
 
 # build release image
-FROM centos:7
+FROM 360cloud/centos:7
 
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
