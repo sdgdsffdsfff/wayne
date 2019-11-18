@@ -26,7 +26,7 @@ export class PodTerminalComponent implements OnInit, OnDestroy {
   resourceName: string;
   resourceType: string;
   pods: KubePod[];
-  @ViewChild('terminal')
+  @ViewChild('terminal', { static: false })
   terminal: ElementRef;
   xterm: Terminal;
   socket: SockJS;
@@ -137,7 +137,8 @@ export class PodTerminalComponent implements OnInit, OnDestroy {
       .subscribe(
         response => {
           const session = response.data.sessionId;
-          const url = `/ws/pods/exec?${session}`;
+          const configUrl = (window as any).CONFIG.URL;
+          const url = `${configUrl}/ws/pods/exec?${session}`;
           this.socket = new SockJS(url);
           this.socket.onopen = this.onConnectionOpen.bind(this, response.data);
           this.socket.onmessage = this.onConnectionMessage.bind(this);

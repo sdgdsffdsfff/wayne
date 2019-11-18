@@ -49,7 +49,7 @@ import { containerDom, ContainerTpl, templateDom } from '../../../shared/base/co
 })
 export class CreateEditDaemonSetTplComponent extends ContainerTpl implements OnInit, AfterViewInit, OnDestroy {
   ngForm: NgForm;
-  @ViewChild('ngForm')
+  @ViewChild('ngForm', { static: true })
   currentForm: NgForm;
 
   actionType: ActionType;
@@ -112,6 +112,9 @@ export class CreateEditDaemonSetTplComponent extends ContainerTpl implements OnI
   }
 
   checkIfInvalid(index: number, field: string): boolean {
+    if (!this.currentForm) {
+      return false;
+    }
     const control = this.currentForm.controls[field + index];
     if (control && control.dirty && !control.valid) {
       return true;
@@ -382,6 +385,7 @@ export class CreateEditDaemonSetTplComponent extends ContainerTpl implements OnI
     this.daemonSetTpl.template = JSON.stringify(newDaemonSet);
     this.daemonSetTpl.id = undefined;
     this.daemonSetTpl.name = this.daemonSet.name;
+    this.daemonSetTpl.createTime = this.daemonSetTpl.updateTime = new Date();
     this.daemonSetTplService.create(this.daemonSetTpl, this.app.id).subscribe(
       status => {
         this.isSubmitOnGoing = false;

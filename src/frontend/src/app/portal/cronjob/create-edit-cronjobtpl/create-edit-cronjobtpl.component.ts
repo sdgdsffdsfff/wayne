@@ -44,13 +44,15 @@ import { CronjobTemplateDom, CronjobContainerDom, ContainerTpl } from '../../../
 })
 export class CreateEditCronjobTplComponent extends ContainerTpl implements OnInit, AfterViewInit, OnDestroy {
   ngForm: NgForm;
-  @ViewChild('ngForm')
+  @ViewChild('ngForm', { static: true })
   currentForm: NgForm;
 
   actionType: ActionType;
   cronjobTpl: CronjobTpl = new CronjobTpl();
   isSubmitOnGoing = false;
   app: App;
+  cpuUnitPrice = 30;
+  memoryUnitPrice = 10;
   cronjob: Cronjob;
   componentName = '计划任务模板';
   top: number;
@@ -157,6 +159,9 @@ export class CreateEditCronjobTplComponent extends ContainerTpl implements OnIni
   }
 
   formValid(field: string): boolean {
+    if (!this.currentForm) {
+      return false;
+    }
     const control = this.currentForm.controls[field];
     if (control && control.dirty && !control.valid) {
       return true;
@@ -165,6 +170,9 @@ export class CreateEditCronjobTplComponent extends ContainerTpl implements OnIni
   }
 
   containerIsInvalid(index: number, field: string): boolean {
+    if (!this.currentForm) {
+      return false;
+    }
     const control = this.currentForm.controls[field + index];
     if (control && control.dirty && !control.valid) {
       return true;
@@ -360,6 +368,7 @@ export class CreateEditCronjobTplComponent extends ContainerTpl implements OnIni
 
     this.cronjobTpl.id = undefined;
     this.cronjobTpl.name = this.cronjob.name;
+    this.cronjobTpl.createTime = this.cronjobTpl.updateTime = new Date();
     this.cronjobTplService.create(this.cronjobTpl, this.app.id).subscribe(
       status => {
         this.isSubmitOnGoing = false;

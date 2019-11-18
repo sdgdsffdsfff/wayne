@@ -43,11 +43,11 @@ export class ListDeploymentComponent implements OnInit, OnDestroy {
   @Output() cloneTpl = new EventEmitter<DeploymentTpl>();
   @Output() createTpl = new EventEmitter<boolean>();
 
-  @ViewChild(ListPodComponent)
+  @ViewChild(ListPodComponent, { static: false })
   listPodComponent: ListPodComponent;
-  @ViewChild(ListEventComponent)
+  @ViewChild(ListEventComponent, { static: false })
   listEventComponent: ListEventComponent;
-  @ViewChild(PublishDeploymentTplComponent)
+  @ViewChild(PublishDeploymentTplComponent, { static: false })
   publishDeploymentTpl: PublishDeploymentTplComponent;
   state: ClrDatagridStateInterface;
   currentPage = 1;
@@ -168,6 +168,17 @@ export class ListDeploymentComponent implements OnInit, OnDestroy {
       status => {
         const deployment = status.data;
         this.publishDeploymentTpl.newPublishTpl(deployment, tpl, ResourcesActionType.OFFLINE);
+      },
+      error => {
+        this.messageHandlerService.handleError(error);
+      });
+  }
+
+  modifyReplicas(tpl: DeploymentTpl) {
+    this.deploymentService.getById(tpl.deploymentId, this.appId).subscribe(
+      status => {
+        const deployment = status.data;
+        this.publishDeploymentTpl.newPublishTpl(deployment, tpl, ResourcesActionType.MODIFY_REPLICA);
       },
       error => {
         this.messageHandlerService.handleError(error);

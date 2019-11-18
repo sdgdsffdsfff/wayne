@@ -49,7 +49,7 @@ import { containerDom, ContainerTpl, templateDom } from '../../../shared/base/co
 
 export class CreateEditStatefulsettplComponent extends ContainerTpl implements OnInit, AfterViewInit, OnDestroy {
   ngForm: NgForm;
-  @ViewChild('ngForm')
+  @ViewChild('ngForm', { static: true })
   currentForm: NgForm;
 
   actionType: ActionType;
@@ -110,6 +110,9 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
   }
 
   checkIfInvalid(index: number, field: string): boolean {
+    if (!this.currentForm) {
+      return false;
+    }
     const control = this.currentForm.controls[field + index];
     if (control && control.dirty && !control.valid) {
       return true;
@@ -378,6 +381,7 @@ export class CreateEditStatefulsettplComponent extends ContainerTpl implements O
     this.statefulsetTpl.template = JSON.stringify(newState);
     this.statefulsetTpl.id = undefined;
     this.statefulsetTpl.name = this.statefulset.name;
+    this.statefulsetTpl.createTime = this.statefulsetTpl.updateTime = new Date();
     this.statefulsetTplService.create(this.statefulsetTpl, this.app.id).subscribe(
       status => {
         this.isSubmitOnGoing = false;
